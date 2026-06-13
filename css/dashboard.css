@@ -1,0 +1,459 @@
+/* ============================================================
+   REDROB — Dashboard & Results Layout
+   Grid layout, sidebar, ranked list, stats, filters, responsive
+   ============================================================ */
+
+
+/* ============================================================
+   DASHBOARD GRID LAYOUT
+   ============================================================ */
+.dashboard {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  gap: 24px;
+  margin-top: 8px;
+}
+
+.dashboard-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: sticky;
+  top: calc(var(--header-height) + 24px);
+  align-self: start;
+  max-height: calc(100vh - var(--header-height) - 48px);
+  overflow-y: auto;
+}
+
+.dashboard-main {
+  min-width: 0; /* prevent grid blowout */
+}
+
+
+/* ============================================================
+   RANKED LIST
+   ============================================================ */
+.ranked-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ranked-list .candidate-card {
+  animation: fadeInUp 0.5s var(--ease-out-expo) both;
+  animation-delay: calc(var(--delay, 0) * 0.1s);
+}
+
+
+/* ============================================================
+   CANDIDATE DETAIL PANEL (Modal Content)
+   ============================================================ */
+.candidate-detail-panel {
+  display: grid;
+  gap: 24px;
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.detail-header .candidate-avatar {
+  width: 64px;
+  height: 64px;
+  font-size: 24px;
+}
+
+.detail-header .candidate-name {
+  font-size: 20px;
+  font-family: var(--font-display);
+}
+
+.detail-header .candidate-title {
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.detail-section {
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 20px;
+}
+
+.detail-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.detail-section__title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: -0.01em;
+}
+
+.detail-section__title .section-icon {
+  font-size: 16px;
+  opacity: 0.7;
+}
+
+
+/* ============================================================
+   COMPARISON BARS
+   ============================================================ */
+.comparison-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.comparison-bar__item {
+  display: grid;
+  grid-template-columns: 120px 1fr 50px;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.comparison-bar__label {
+  color: var(--text-secondary);
+  text-align: right;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.comparison-bar__bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  position: relative;
+}
+
+.comparison-bar__fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shimmer on comparison fills */
+.comparison-bar__fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: shimmer 2.5s ease-in-out infinite;
+  animation-delay: calc(var(--delay, 0) * 0.15s);
+}
+
+.comparison-bar__fill--skills {
+  background: linear-gradient(90deg, #4f7cff, #7c5cff);
+}
+
+.comparison-bar__fill--experience {
+  background: linear-gradient(90deg, #4ade80, #22d3ee);
+}
+
+.comparison-bar__fill--education {
+  background: linear-gradient(90deg, #fbbf24, #f97316);
+}
+
+.comparison-bar__fill--career {
+  background: linear-gradient(90deg, #ec4899, #8b5cf6);
+}
+
+.comparison-bar__fill--achievements {
+  background: linear-gradient(90deg, #06b6d4, #3b82f6);
+}
+
+.comparison-bar__fill--behavioral {
+  background: linear-gradient(90deg, #a78bfa, #6366f1);
+}
+
+.comparison-bar__value {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-primary);
+  text-align: right;
+  font-family: var(--font-mono);
+}
+
+
+/* ============================================================
+   SUMMARY STATS
+   ============================================================ */
+.summary-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summary-stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.summary-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent);
+}
+
+.summary-stat-card:hover {
+  border-color: var(--border-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.summary-stat-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.summary-stat-card__icon--candidates {
+  background: rgba(var(--accent-primary-rgb), 0.12);
+}
+
+.summary-stat-card__icon--avg {
+  background: rgba(var(--accent-secondary-rgb), 0.12);
+}
+
+.summary-stat-card__icon--top {
+  background: rgba(var(--color-success-rgb), 0.12);
+}
+
+.summary-stat-card__icon--risk {
+  background: rgba(var(--color-danger-rgb), 0.12);
+}
+
+.summary-stat-card__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.summary-stat-card__label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.summary-stat-card__value {
+  font-size: 28px;
+  font-weight: 700;
+  font-family: var(--font-display);
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+
+/* ============================================================
+   FILTER BAR
+   ============================================================ */
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.filter-bar .input-field {
+  max-width: 300px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.filter-bar select.input-field {
+  max-width: 200px;
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238b8fb0' d='M6 8.825L1.175 4l.825-.825L6 7.175 9.975 3.2l.85.825z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 12px;
+}
+
+.filter-bar select.input-field option {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  padding: 8px;
+}
+
+
+/* ============================================================
+   RESPONSIVE BREAKPOINTS
+   ============================================================ */
+@media (max-width: 1024px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-sidebar {
+    order: 2;
+    position: static;
+    max-height: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .dashboard-sidebar .panel {
+    flex: 1;
+    min-width: 280px;
+  }
+
+  .dashboard-main {
+    order: 1;
+  }
+
+  .summary-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    padding: 0 16px;
+  }
+
+  .app-main {
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: calc(var(--header-height) + 16px);
+  }
+
+  .summary-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-bar .input-field {
+    max-width: 100%;
+  }
+
+  .filter-bar select.input-field {
+    max-width: 100%;
+  }
+
+  .comparison-bar__item {
+    grid-template-columns: 80px 1fr 40px;
+    font-size: 12px;
+  }
+
+  .step-indicators {
+    display: none;
+  }
+
+  .step-actions {
+    flex-direction: column;
+  }
+
+  .step-actions .btn-primary,
+  .step-actions .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .modal {
+    width: 96%;
+    padding: 24px 20px;
+    border-radius: var(--radius-lg);
+    max-height: 90vh;
+  }
+
+  .panel {
+    padding: 20px;
+  }
+
+  .detail-header {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .candidate-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 24px 16px;
+    gap: 14px;
+  }
+
+  .candidate-card .candidate-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .candidate-title {
+    white-space: normal;
+  }
+
+  .panel {
+    padding: 18px 14px;
+    border-radius: var(--radius-md);
+  }
+
+  .panel-header {
+    font-size: 16px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+
+  .summary-stat-card {
+    padding: 16px;
+  }
+
+  .summary-stat-card__value {
+    font-size: 24px;
+  }
+
+  .summary-stat-card__icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .candidates-grid {
+    grid-template-columns: 1fr;
+  }
+}

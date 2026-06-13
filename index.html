@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Redrob Candidate Ranking Engine — AI-powered talent intelligence platform for intelligent candidate scoring, risk detection, and recruiter-ready ranking reports.">
+  <title>Redrob — Candidate Ranking Engine</title>
+
+  <!-- Favicon (SVG emoji) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/index.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+
+  <!-- File Parsing Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <script>
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.5.1/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <!-- ========== HEADER ========== -->
+  <header class="app-header">
+    <div class="app-logo">
+      <span class="app-logo-icon">⚡</span>
+      <span class="app-logo-text">Redrob</span>
+    </div>
+    <nav class="step-indicators" aria-label="Progress">
+      <div class="step-indicator active" data-step="1">
+        <span class="step-indicator__number">1</span>
+        <span class="step-indicator__label">Job Description</span>
+      </div>
+      <span class="step-indicator__arrow" aria-hidden="true">→</span>
+      <div class="step-indicator" data-step="2">
+        <span class="step-indicator__number">2</span>
+        <span class="step-indicator__label">Candidates</span>
+      </div>
+      <span class="step-indicator__arrow" aria-hidden="true">→</span>
+      <div class="step-indicator" data-step="3">
+        <span class="step-indicator__number">3</span>
+        <span class="step-indicator__label">Results</span>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="app-main">
+
+    <!-- ===== Step 1: Job Description ===== -->
+    <section id="step-jd" class="step-section active">
+      <div class="panel">
+        <div class="panel-header">Job Description</div>
+        
+        <div class="drop-zone" id="jd-drop-zone">
+            <span class="drop-zone-icon">📄</span>
+            <span class="drop-zone-text">Drag & Drop JD file (.pdf, .docx, .md, .txt) or click to browse</span>
+            <input type="file" id="jd-file-input" accept=".pdf,.docx,.txt,.md" style="display: none;">
+        </div>
+
+        <div style="margin: 16px 0; text-align: center; color: var(--text-muted); font-size: 0.9em;">OR PASTE TEXT</div>
+        
+        <textarea id="jd-input" class="textarea-field" placeholder="Paste or type the job description here..."></textarea>
+        <div class="jd-preview" id="jd-preview"></div>
+        <div class="step-actions">
+          <button id="btn-load-demo" class="btn-secondary">📂 Load Demo Data</button>
+          <button id="btn-parse-jd" class="btn-primary">Analyze Job Description →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Step 2: Candidates ===== -->
+    <section id="step-candidates" class="step-section">
+      <div class="panel">
+        <div class="panel-header">Candidate Profiles</div>
+        <div class="tab-group">
+          <button class="tab-item active" data-tab="json">File / Text Input</button>
+          <button class="tab-item" data-tab="preview">Preview</button>
+        </div>
+        <div id="tab-json" class="tab-content active">
+          <div class="drop-zone" id="candidates-drop-zone">
+              <span class="drop-zone-icon">📂</span>
+              <span class="drop-zone-text">Drag & Drop Candidates file (.json, .csv, .xlsx) or click to browse</span>
+              <input type="file" id="candidates-file-input" accept=".json,.csv,.xlsx,.xls" style="display: none;">
+          </div>
+          <div style="margin: 16px 0; text-align: center; color: var(--text-muted); font-size: 0.9em;">OR PASTE JSON</div>
+          <textarea id="candidates-input" class="json-editor" placeholder='[{ "candidate_id": "C001", ... }]'></textarea>
+        </div>
+        <div id="tab-preview" class="tab-content">
+          <div id="candidates-preview" class="candidates-grid"></div>
+        </div>
+        <div class="step-actions">
+          <button id="btn-back-jd" class="btn-secondary">← Back</button>
+          <button id="btn-rank" class="btn-primary">🚀 Rank Candidates</button>
+        </div>
+        
+        <!-- Progress Bar for Web Worker -->
+        <div id="ranking-progress-container" style="display: none; margin-top: 20px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span style="color: var(--text-muted); font-size: 0.9em;">Processing candidates...</span>
+                <span id="ranking-progress-text" style="color: var(--accent-color); font-weight: bold;">0%</span>
+            </div>
+            <div style="width: 100%; background: rgba(255,255,255,0.1); border-radius: 8px; height: 8px; overflow: hidden;">
+                <div id="ranking-progress-fill" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--accent-color), var(--accent-secondary)); transition: width 0.2s;"></div>
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Step 3: Results Dashboard ===== -->
+    <section id="step-results" class="step-section">
+      <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="dashboard-sidebar">
+          <div class="panel">
+            <div class="panel-header">Scoring Weights</div>
+            <div id="weight-controls"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">JD Summary</div>
+            <div id="jd-summary"></div>
+          </div>
+        </aside>
+
+        <!-- Main Results Area -->
+        <div class="dashboard-main">
+          <div class="summary-stats" id="summary-stats"></div>
+          <div class="filter-bar" id="filter-bar">
+            <input type="text" class="input-field" id="search-candidates" placeholder="🔍 Search candidates...">
+            <select class="input-field" id="sort-by">
+              <option value="score">Sort by Score</option>
+              <option value="experience">Sort by Experience</option>
+              <option value="skills">Sort by Skill Match</option>
+            </select>
+          </div>
+          <div class="ranked-list" id="ranked-list"></div>
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button id="btn-back-candidates" class="btn-secondary">← Back</button>
+        <button id="btn-export-json" class="btn-primary">📋 Copy JSON Output</button>
+        <button id="btn-new-ranking" class="btn-secondary">🔄 New Ranking</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========== MODAL: Candidate Detail ========== -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal" id="candidate-modal">
+      <button class="btn-icon modal-close" id="modal-close" aria-label="Close modal">✕</button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <!-- ========== TOAST CONTAINER ========== -->
+  <div id="toast-container" aria-live="polite"></div>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script src="js/utils.js"></script>
+  <script src="data/demo-data.js"></script>
+  <script src="js/file-parsers.js"></script>
+  <script src="js/jd-parser.js"></script>
+  <script src="js/candidate-normalizer.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
