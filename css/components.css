@@ -143,6 +143,22 @@
 /* ============================================================
    PANELS
    ============================================================ */
+.modal {
+  background: rgba(17, 22, 56, 0.95);
+  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: 32px 40px;
+  width: 90%;
+  max-width: 900px;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: var(--shadow-xl), 0 0 0 1px rgba(var(--accent-primary-rgb), 0.1);
+  animation: scaleIn 0.3s var(--ease-out-expo) both;
+}
+
 .panel {
   background: var(--glass-bg);
   backdrop-filter: blur(16px) saturate(1.5);
@@ -999,7 +1015,7 @@
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-xl);
   padding: 32px;
-  max-width: 720px;
+  max-width: 900px; /* Expanded for Drill Down Report */
   width: 92%;
   max-height: 85vh;
   overflow-y: auto;

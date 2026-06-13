@@ -63,7 +63,12 @@ window.Redrob.CompositeScorer = {
             // Internal payload for Dashboard UI
             _dashboardData: {
                 flags: anomaly.flags,
-                archetype: behavior.archetype
+                archetype: behavior.archetype,
+                behavioral: behavior,
+                skills: {
+                    matched: skills.matched_skills || [],
+                    missing: skills.missing_skills || []
+                }
             }
         };
     }

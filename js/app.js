@@ -257,74 +257,116 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderDashboard() {
         rankedList.innerHTML = '';
 
-        // Generate Dynamic JD Summary
-        let classification = "Standard Technical";
-        const jdTitle = (currentJobProfile.title || "").toLowerCase();
-        if (jdTitle.includes('ai') || jdTitle.includes('machine learning')) classification = "AI/ML Focus";
-        if (jdTitle.includes('manager') || jdTitle.includes('lead')) classification = "Leadership/Management";
-        // Update JD Summary
+        const jp = currentJobProfile || {};
+
+        // Feature 6: Enhanced JD Analysis
         const jdSummary = document.getElementById('jd-summary');
-        if (jdSummary && currentJobProfile) {
-            const jp = currentJobProfile;
-            const reqSkills = (jp.required_skills || []).join(', ') || 'None specified';
-            const prefSkills = (jp.preferred_skills || []).join(', ') || 'None specified';
-            const keywords = (jp.domain_keywords || []).join(', ') || 'General';
+        if (jdSummary && jp) {
+            const reqSkillsHtml = (jp.required_skills || []).map(s => `<span class="skill-chip">${s}</span>`).join(' ') || '<span class="text-muted">None specified</span>';
+            const prefSkillsHtml = (jp.preferred_skills || []).map(s => `<span class="skill-chip skill-chip--preferred">${s}</span>`).join(' ') || '<span class="text-muted">None specified</span>';
+            const keywordsHtml = (jp.domain_keywords || []).map(s => `<span class="skill-chip" style="opacity: 0.8">${s}</span>`).join(' ') || 'General';
             
             jdSummary.innerHTML = `
                 <div style="margin-bottom: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
                     <div style="font-size: 1.1em; color: var(--text-primary); font-weight: 600;">${jp.title || 'N/A'}</div>
                     <div style="color: var(--accent-primary); font-size: 0.85em; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em;">${jp.seniority || 'N/A'} Level</div>
                 </div>
-                
-                <div style="margin-bottom: 10px;"><strong>Experience Range:</strong> ${jp.min_experience || 0}-${jp.max_experience || '∞'} years</div>
-                
-                <div style="margin-bottom: 10px;">
-                    <strong>Required Skills:</strong>
-                    <div style="margin-top: 4px; font-size: 0.9em; line-height: 1.4;">${reqSkills}</div>
-                </div>
-                
-                <div style="margin-bottom: 10px;">
-                    <strong>Preferred Skills:</strong>
-                    <div style="margin-top: 4px; font-size: 0.9em; line-height: 1.4;">${prefSkills}</div>
-                </div>
-                
-                <div style="margin-bottom: 10px;"><strong>Leadership Req:</strong> ${jp.leadership_required ? 'Yes' : 'No'}</div>
-                <div style="margin-bottom: 10px;"><strong>Domain Classification:</strong> ${jp.industry || 'General Tech'}</div>
-                <div style="margin-bottom: 10px;"><strong>Extracted Keywords:</strong> <span style="opacity: 0.8">${keywords}</span></div>
+                <div style="margin-bottom: 12px;"><strong>Experience Range:</strong> ${jp.min_experience || 0}-${jp.max_experience || '∞'} years</div>
+                <div style="margin-bottom: 12px;"><strong>Required Skills:</strong><div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px;">${reqSkillsHtml}</div></div>
+                <div style="margin-bottom: 12px;"><strong>Preferred Skills:</strong><div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px;">${prefSkillsHtml}</div></div>
+                <div style="margin-bottom: 12px;"><strong>Leadership Req:</strong> ${jp.leadership_required ? 'Yes' : 'No'}</div>
+                <div style="margin-bottom: 12px;"><strong>Domain Classification:</strong> ${jp.industry || 'General Tech'}</div>
+                <div style="margin-bottom: 12px;"><strong>AI Readiness Req:</strong> ${jp.aiRequirement || 'Standard'}</div>
+                <div style="margin-bottom: 12px;"><strong>Keywords:</strong><div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px;">${keywordsHtml}</div></div>
             `;
-        } // Generate Weight Bars
-        const weights = window.Redrob.DynamicWeights.generate(currentJobProfile);
+        }
+
+        // Feature 7: Advanced Scoring Weights
+        const weights = window.Redrob.DynamicWeights.generate(jp);
         let weightsHtml = '';
+        const weightDescriptions = {
+            base_skill: "Foundational & exact technical skill matches.",
+            experience: "Years of relevant experience & timeline.",
+            career: "Promotions, trajectory, & scope expansion.",
+            behavioral: "Responsiveness & market recruitability.",
+            ai_transition: "Machine learning & gen-AI exposure.",
+            interaction: "Behavioral market markers."
+        };
+
         for (const [key, val] of Object.entries(weights)) {
             if (val > 0) {
+                const title = key.replace(/([A-Z_])/g, ' $1').replace(/^./, str => str.toUpperCase()).replace('_', ' ');
+                const desc = weightDescriptions[key] || "Component scoring weight based on JD analysis.";
                 weightsHtml += `
-                    <div style="margin-bottom: 8px;">
-                        <div style="display: flex; justify-content: space-between; font-size: 0.8em; color: var(--text-muted); margin-bottom: 2px;">
-                            <span>${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
-                            <span>${(val * 100).toFixed(0)}%</span>
+                    <div style="margin-bottom: 14px;">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
+                            <span style="font-weight: 600; color: var(--text-primary); font-size: 13px;">${title}</span>
+                            <span style="font-family: var(--font-mono); color: var(--accent-primary); font-weight: 700; font-size: 12px;">${(val * 100).toFixed(0)}%</span>
                         </div>
-                        <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-                            <div style="width: ${(val * 100)}%; height: 100%; background: var(--accent-color);"></div>
+                        <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; margin-bottom: 4px;">
+                            <div style="width: ${(val * 100)}%; height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));"></div>
                         </div>
+                        <div style="font-size: 11px; color: var(--text-muted); line-height: 1.3;">${desc}</div>
                     </div>
                 `;
             }
         }
         document.getElementById('weight-controls').innerHTML = weightsHtml;
 
-        // Stats
+        // Feature 5: Ranking Pipeline Visualization
+        const pipelineStages = [
+            { name: "Job Description", desc: "Parsed rules & constraints." },
+            { name: "Skill Intelligence", desc: "Evaluates exact, cluster, and missing technical skills." },
+            { name: "Behavioral Intelligence", desc: "Measures responsiveness, reliability, and recruitability." },
+            { name: "Career Analysis", desc: "Tracks promotion velocity and leadership growth." },
+            { name: "AI Transition Engine", desc: "Assesses gen-AI/ML capabilities and data readiness." },
+            { name: "Confidence Engine", desc: "Calculates trust score via profile verification." },
+            { name: "Risk & Anomaly Detection", desc: "Flags honeypots, inflated titles, and trap profiles." },
+            { name: "Final Ranking", desc: "Generates composite score and tier." }
+        ];
+        
+        let pipelineHtml = '';
+        pipelineStages.forEach((stage, idx) => {
+            pipelineHtml += `
+                <div class="pipeline-stage">
+                    <div class="pipeline-header">
+                        <span class="pipeline-title">${stage.name}</span>
+                    </div>
+                    <div class="pipeline-details">${stage.desc}</div>
+                </div>
+            `;
+            if (idx < pipelineStages.length - 1) {
+                pipelineHtml += `<div class="pipeline-arrow">↓</div>`;
+            }
+        });
+        document.getElementById('methodology-pipeline').innerHTML = pipelineHtml;
+
+        // Add interactive toggles to pipeline stages
+        document.querySelectorAll('.pipeline-stage').forEach(el => {
+            el.addEventListener('click', () => el.classList.toggle('expanded'));
+        });
+
+        // Feature 8: Executive Summary Dashboard (8 Metrics)
         const avgConf = Math.round(currentRankedCandidates.reduce((sum, c) => sum + c.compositeResult.confidence_score, 0) / currentRankedCandidates.length) || 0;
+        const avgTech = Math.round(currentRankedCandidates.reduce((sum, c) => sum + c.compositeResult.technical_fit, 0) / currentRankedCandidates.length) || 0;
+        const avgBehav = Math.round(currentRankedCandidates.reduce((sum, c) => sum + c.compositeResult.behavioral_fit, 0) / currentRankedCandidates.length) || 0;
         const highConf = currentRankedCandidates.filter(c => c.compositeResult.confidence_score > 80).length;
         const honeypots = currentRankedCandidates.filter(c => c.compositeResult.honeypot_risk_score > 30).length;
+        const topAi = currentRankedCandidates.filter(c => c.compositeResult.ai_transition_readiness > 70).length;
+        const lowRisk = currentRankedCandidates.filter(c => c.compositeResult.honeypot_risk_score < 10 && (c.compositeResult._dashboardData.flags || []).length === 0).length;
 
         document.getElementById('summary-stats').innerHTML = `
-            <div class="summary-stat-card">Total: ${currentRankedCandidates.length}</div>
-            <div class="summary-stat-card">High Confidence: ${highConf}</div>
-            <div class="summary-stat-card">Avg Confidence: ${avgConf}</div>
-            <div class="summary-stat-card" style="${honeypots > 0 ? 'color: var(--danger-color);' : ''}">Honeypots: ${honeypots}</div>
+            <div class="summary-stat-card"><div class="summary-stat-card__content"><div class="summary-stat-card__label">Total Candidates</div><div class="summary-stat-card__value">${currentRankedCandidates.length}</div></div></div>
+            <div class="summary-stat-card"><div class="summary-stat-card__content"><div class="summary-stat-card__label">High Confidence</div><div class="summary-stat-card__value" style="color:var(--color-success)">${highConf}</div></div></div>
+            <div class="summary-stat-card"><div class="summary-stat-card__content"><div class="summary-stat-card__label">Average Confidence</div><div class="summary-stat-card__value">${avgConf}</div></div></div>
+            <div class="summary-stat-card"><div class="summary-stat-card__content"><div class="summary-stat-card__label">Average Tech Fit</div><div class="summary-stat-card__value">${avgTech}</div></div></div>
+            <div class="summary-stat-card"><div class="summary-stat-card__content"><div class="summary-stat-card__label">Average Behav. Fit</div><div class="summary-stat-card__value">${avgBehav}</div></div></div>
+            <div class="summary-stat-card"><div class="summary-stat-card__content"><div class="summary-stat-card__label">Top AI Transition</div><div class="summary-stat-card__value" style="color:var(--accent-primary)">${topAi}</div></div></div>
+            <div class="summary-stat-card"><div class="summary-stat-card__content"><div class="summary-stat-card__label">Low Risk Profiles</div><div class="summary-stat-card__value">${lowRisk}</div></div></div>
+            <div class="summary-stat-card"><div class="summary-stat-card__content"><div class="summary-stat-card__label">Potential Honeypots</div><div class="summary-stat-card__value" style="color:var(--color-danger)">${honeypots}</div></div></div>
         `;
 
-        // Render ONLY Top 100 to prevent browser crash
+        // Render Candidate Cards
         const renderLimit = Math.min(100, currentRankedCandidates.length);
         
         for(let idx = 0; idx < renderLimit; idx++) {
@@ -332,53 +374,82 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.createElement('div');
             card.className = 'candidate-card animate-in';
             card.style.setProperty('--delay', `${idx * 0.05}s`);
-            card.style.cursor = 'pointer'; // Make it clickable
+            card.style.flexDirection = 'column';
+            card.style.alignItems = 'stretch';
             
-            const dashData = r.compositeResult._dashboardData || {};
             const isHoneypot = r.compositeResult.honeypot_risk_score > 30;
             const conf = r.compositeResult.confidence_score;
             
-            let confBadgeColor = conf > 80 ? 'var(--success-color)' : (conf > 50 ? 'var(--warning-color)' : 'var(--danger-color)');
+            let confBadgeColor = conf > 80 ? 'var(--color-success)' : (conf > 50 ? 'var(--color-warning)' : 'var(--color-danger)');
             let confText = conf > 80 ? 'High Confidence' : (conf > 50 ? 'Medium Confidence' : 'Low Confidence');
 
-            let riskBadgeHtml = isHoneypot ? `<span style="background: rgba(255,107,107,0.2); color: #ff6b6b; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 10px;">High Risk / Honeypot</span>` : 
-                                `<span style="background: rgba(74,222,128,0.2); color: #4ade80; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 10px;">Low Risk</span>`;
+            let riskBadgeHtml = isHoneypot ? `<span class="risk-badge risk-badge--critical">High Risk / Honeypot</span>` : 
+                                `<span class="risk-badge risk-badge--low">Low Risk</span>`;
 
             card.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; cursor: pointer;" class="candidate-header-toggle">
                     <div style="flex: 1;">
-                        <div style="display: flex; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
                             <h3 class="candidate-name" style="margin: 0;">#${r.rank} - ${r.candidate.name}</h3>
-                            <span style="background: ${confBadgeColor}33; color: ${confBadgeColor}; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 10px;">${confText} (${conf})</span>
+                            <span style="background: ${confBadgeColor}22; color: ${confBadgeColor}; padding: 3px 8px; border-radius: var(--radius-full); font-size: 11px; font-weight: 600;">${confText} (${conf})</span>
                             ${riskBadgeHtml}
                         </div>
-                        <div class="candidate-title" style="margin-top: 4px;">${r.candidate.title} | ${r.candidate.total_experience_years} yrs</div>
+                        <div class="candidate-title" style="margin-top: 6px;">${r.candidate.title} | ${r.candidate.total_experience_years} yrs</div>
                     </div>
                     <div style="text-align: right; min-width: 120px;">
-                        <div class="score-badge" style="background: var(--${r.tierColor}-dark); color: var(--${r.tierColor}-text); padding: 4px 8px; border-radius: 4px; font-weight: bold; display: inline-block;">
+                        <div class="score-badge" style="background: var(--${r.tierColor}-dark); color: var(--${r.tierColor}-text); padding: 6px 12px; font-size: 14px;">
                            ${r.compositeResult.final_score} - ${r.tier}
                         </div>
                     </div>
                 </div>
-                <div style="margin-top: 12px; font-size: 0.9em; color: var(--text-muted); line-height: 1.4;">
+                <div style="margin-top: 12px; font-size: 13px; color: var(--text-muted); line-height: 1.5; padding-right: 40px;">
                     ${r.compositeResult.reasoning}
                 </div>
                 
-                <!-- Expandable Details -->
-                <div class="candidate-details-grid" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.85em;">
-                    <div><span style="color:var(--text-muted)">Tech Fit:</span> <strong>${r.compositeResult.technical_fit}</strong></div>
-                    <div><span style="color:var(--text-muted)">Behavior:</span> <strong>${r.compositeResult.behavioral_fit}</strong></div>
-                    <div><span style="color:var(--text-muted)">Career:</span> <strong>${r.compositeResult.career_fit}</strong></div>
-                    <div><span style="color:var(--text-muted)">AI Ready:</span> <strong>${r.compositeResult.ai_transition_readiness}</strong></div>
-                    <div><span style="color:var(--text-muted)">Interact:</span> <strong>${r.compositeResult.interaction_score}</strong></div>
-                    <div><span style="color:var(--text-muted)">Leadership:</span> <strong>${r.compositeResult.leadership_growth || 0}</strong></div>
+                <!-- Feature 2 & 3: Expandable Visual Breakdown -->
+                <div class="candidate-score-breakdown" style="display: none;">
+                    <div class="score-row">
+                        <div class="score-row-header"><span>Technical Fit</span><span class="score-val">${r.compositeResult.technical_fit}</span></div>
+                        <div class="score-bar-bg"><div class="score-bar-fill" style="width: ${r.compositeResult.technical_fit}%; background: #4f7cff;"></div></div>
+                    </div>
+                    <div class="score-row">
+                        <div class="score-row-header"><span>Behavioral Fit</span><span class="score-val">${r.compositeResult.behavioral_fit}</span></div>
+                        <div class="score-bar-bg"><div class="score-bar-fill" style="width: ${r.compositeResult.behavioral_fit}%; background: #a78bfa;"></div></div>
+                    </div>
+                    <div class="score-row">
+                        <div class="score-row-header"><span>Career Fit</span><span class="score-val">${r.compositeResult.career_fit}</span></div>
+                        <div class="score-bar-bg"><div class="score-bar-fill" style="width: ${r.compositeResult.career_fit}%; background: #ec4899;"></div></div>
+                    </div>
+                    <div class="score-row">
+                        <div class="score-row-header"><span>AI Transition</span><span class="score-val">${r.compositeResult.ai_transition_readiness}</span></div>
+                        <div class="score-bar-bg"><div class="score-bar-fill" style="width: ${r.compositeResult.ai_transition_readiness}%; background: #22d3ee;"></div></div>
+                    </div>
+                    <div class="score-row">
+                        <div class="score-row-header"><span>Confidence</span><span class="score-val">${r.compositeResult.confidence_score}</span></div>
+                        <div class="score-bar-bg"><div class="score-bar-fill" style="width: ${r.compositeResult.confidence_score}%; background: #4ade80;"></div></div>
+                    </div>
+                    <div class="score-row">
+                        <div class="score-row-header"><span>Leadership</span><span class="score-val">${r.compositeResult.leadership_growth || 0}</span></div>
+                        <div class="score-bar-bg"><div class="score-bar-fill" style="width: ${r.compositeResult.leadership_growth || 0}%; background: #fbbf24;"></div></div>
+                    </div>
+                    <div style="grid-column: 1 / -1; margin-top: 12px; display: flex; justify-content: flex-end;">
+                        <button class="btn-secondary btn-full-report">View Full Intelligence Report →</button>
+                    </div>
                 </div>
             `;
             
             // Expand logic
-            card.addEventListener('click', () => {
-                const grid = card.querySelector('.candidate-details-grid');
-                grid.style.display = grid.style.display === 'none' ? 'grid' : 'none';
+            const headerToggle = card.querySelector('.candidate-header-toggle');
+            const breakdown = card.querySelector('.candidate-score-breakdown');
+            headerToggle.addEventListener('click', () => {
+                breakdown.style.display = breakdown.style.display === 'none' ? 'grid' : 'none';
+            });
+
+            // Feature 4: Drill-Down Report logic
+            const btnReport = card.querySelector('.btn-full-report');
+            btnReport.addEventListener('click', (e) => {
+                e.stopPropagation();
+                renderCandidateModal(r);
             });
             
             rankedList.appendChild(card);
@@ -392,6 +463,97 @@ document.addEventListener('DOMContentLoaded', () => {
              note.textContent = `Showing top 100 of ${currentRankedCandidates.length}. Click "Copy JSON Output" for full results.`;
              rankedList.appendChild(note);
         }
+    }
+
+    // Feature 4: Candidate Drill-Down Report
+    function renderCandidateModal(rankedData) {
+        const c = rankedData.candidate;
+        const res = rankedData.compositeResult;
+        const dashData = res._dashboardData || {};
+
+        const modalContent = document.getElementById('modal-content');
+        
+        // Generate Skills HTML
+        const matchedSkills = (dashData.skills?.matched || []).map(s => `<span class="skill-chip skill-chip--match">${s}</span>`).join(' ') || 'None';
+        const missingSkills = (dashData.skills?.missing || []).map(s => `<span class="skill-chip skill-chip--missing">${s}</span>`).join(' ') || 'None';
+        
+        // Generate Anomalies HTML
+        const flagsArray = dashData.flags || [];
+        const anomaliesHtml = flagsArray.length > 0 
+            ? `<ul style="color: var(--color-danger); padding-left: 20px;">` + flagsArray.map(f => `<li>${f}</li>`).join('') + `</ul>`
+            : `<div style="color: var(--color-success);">No risk anomalies detected.</div>`;
+
+        modalContent.innerHTML = `
+            <div class="detail-header" style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 20px; margin-bottom: 24px;">
+                <div style="flex: 1;">
+                    <h2 style="font-family: var(--font-display); font-size: 24px; margin-bottom: 8px;">${c.name}</h2>
+                    <div style="color: var(--text-muted); font-size: 14px;">${c.title} • ${c.total_experience_years} Years Exp. • ${c.location || 'Remote'}</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 32px; font-family: var(--font-display); font-weight: 800; color: var(--accent-primary);">${res.final_score}</div>
+                    <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);">${rankedData.tier}</div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+                <!-- Left Column -->
+                <div>
+                    <div class="detail-section" style="margin-bottom: 24px;">
+                        <h3 class="detail-section__title">Final Explanation</h3>
+                        <div style="background: rgba(255,255,255,0.03); padding: 16px; border-radius: var(--radius-md); font-size: 14px; line-height: 1.6; color: var(--text-primary); border-left: 3px solid var(--accent-primary);">
+                            ${res.reasoning}
+                        </div>
+                    </div>
+
+                    <div class="detail-section" style="margin-bottom: 24px;">
+                        <h3 class="detail-section__title">Skill Intelligence</h3>
+                        <div style="margin-bottom: 12px;"><strong>Matched Required Skills:</strong><div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px;">${matchedSkills}</div></div>
+                        <div><strong>Missing Core Skills:</strong><div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px;">${missingSkills}</div></div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3 class="detail-section__title">Behavioral & Career Intelligence</h3>
+                        <ul style="list-style-type: none; padding: 0; line-height: 2;">
+                            <li><strong style="color: var(--text-muted);">Promotion Score:</strong> ${res.career_fit}/100</li>
+                            <li><strong style="color: var(--text-muted);">Leadership Growth:</strong> ${res.leadership_growth || 0}/100</li>
+                            <li><strong style="color: var(--text-muted);">Responsiveness:</strong> ${dashData.behavioral?.responsiveness || 'N/A'}</li>
+                            <li><strong style="color: var(--text-muted);">Market Demand:</strong> ${dashData.behavioral?.market_demand || 'N/A'}</li>
+                            <li><strong style="color: var(--text-muted);">Recruitability:</strong> ${dashData.behavioral?.recruitability || 'N/A'}</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div>
+                    <div class="detail-section" style="margin-bottom: 24px;">
+                        <h3 class="detail-section__title">AI Transition Analysis</h3>
+                        <div style="background: rgba(34, 211, 238, 0.05); padding: 16px; border-radius: var(--radius-md); border: 1px solid rgba(34, 211, 238, 0.2);">
+                            <div style="font-size: 24px; font-weight: 700; color: #22d3ee; margin-bottom: 8px;">${res.ai_transition_readiness} / 100</div>
+                            <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">Evaluates foundational proxy skills (data eng, math, python, backend complexity) that indicate readiness to adopt or transition to generative AI and ML roles.</div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section" style="margin-bottom: 24px;">
+                        <h3 class="detail-section__title">Confidence Assessment</h3>
+                        <div style="background: rgba(74, 222, 128, 0.05); padding: 16px; border-radius: var(--radius-md); border: 1px solid rgba(74, 222, 128, 0.2);">
+                            <div style="font-size: 24px; font-weight: 700; color: #4ade80; margin-bottom: 8px;">${res.confidence_score} / 100</div>
+                            <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">Overall system confidence in the ranking placement based on verifiable data, timeline consistency, and skill proofs.</div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3 class="detail-section__title">Risk Analysis</h3>
+                        <div style="background: rgba(255, 107, 107, 0.05); padding: 16px; border-radius: var(--radius-md); border: 1px solid rgba(255, 107, 107, 0.2);">
+                            <div style="font-size: 24px; font-weight: 700; color: #ff6b6b; margin-bottom: 8px;">${res.honeypot_risk_score} / 100</div>
+                            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Honeypot / Trap Risk Severity</div>
+                            ${anomaliesHtml}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('modal-overlay').style.display = 'flex';
     }
 
     // Modal close
