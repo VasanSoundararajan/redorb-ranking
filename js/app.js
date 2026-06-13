@@ -262,14 +262,37 @@ document.addEventListener('DOMContentLoaded', () => {
         const jdTitle = (currentJobProfile.title || "").toLowerCase();
         if (jdTitle.includes('ai') || jdTitle.includes('machine learning')) classification = "AI/ML Focus";
         if (jdTitle.includes('manager') || jdTitle.includes('lead')) classification = "Leadership/Management";
-        
-        document.getElementById('jd-summary').innerHTML = `
-            <div><strong>Role:</strong> ${currentJobProfile.title || "N/A"}</div>
-            <div><strong>Experience:</strong> ${currentJobProfile.experience_years || 0}+ years</div>
-            <div><strong>Classification:</strong> ${classification}</div>
-        `;
-
-        // Generate Weight Bars
+        // Update JD Summary
+        const jdSummary = document.getElementById('jd-summary');
+        if (jdSummary && currentJobProfile) {
+            const jp = currentJobProfile;
+            const reqSkills = (jp.required_skills || []).join(', ') || 'None specified';
+            const prefSkills = (jp.preferred_skills || []).join(', ') || 'None specified';
+            const keywords = (jp.domain_keywords || []).join(', ') || 'General';
+            
+            jdSummary.innerHTML = `
+                <div style="margin-bottom: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+                    <div style="font-size: 1.1em; color: var(--text-primary); font-weight: 600;">${jp.title || 'N/A'}</div>
+                    <div style="color: var(--accent-primary); font-size: 0.85em; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em;">${jp.seniority || 'N/A'} Level</div>
+                </div>
+                
+                <div style="margin-bottom: 10px;"><strong>Experience Range:</strong> ${jp.min_experience || 0}-${jp.max_experience || '∞'} years</div>
+                
+                <div style="margin-bottom: 10px;">
+                    <strong>Required Skills:</strong>
+                    <div style="margin-top: 4px; font-size: 0.9em; line-height: 1.4;">${reqSkills}</div>
+                </div>
+                
+                <div style="margin-bottom: 10px;">
+                    <strong>Preferred Skills:</strong>
+                    <div style="margin-top: 4px; font-size: 0.9em; line-height: 1.4;">${prefSkills}</div>
+                </div>
+                
+                <div style="margin-bottom: 10px;"><strong>Leadership Req:</strong> ${jp.leadership_required ? 'Yes' : 'No'}</div>
+                <div style="margin-bottom: 10px;"><strong>Domain Classification:</strong> ${jp.industry || 'General Tech'}</div>
+                <div style="margin-bottom: 10px;"><strong>Extracted Keywords:</strong> <span style="opacity: 0.8">${keywords}</span></div>
+            `;
+        } // Generate Weight Bars
         const weights = window.Redrob.DynamicWeights.generate(currentJobProfile);
         let weightsHtml = '';
         for (const [key, val] of Object.entries(weights)) {
