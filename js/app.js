@@ -3,7 +3,6 @@ window.Redrob = window.Redrob || {};
 document.addEventListener('DOMContentLoaded', () => {
     // UI Elements
     const btnParseJd = document.getElementById('btn-parse-jd');
-    const btnLoadDemo = document.getElementById('btn-load-demo');
     const btnBackJd = document.getElementById('btn-back-jd');
     const btnRank = document.getElementById('btn-rank');
     const btnBackCandidates = document.getElementById('btn-back-candidates');
@@ -110,22 +109,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Step 1: Parse JD
     btnParseJd.addEventListener('click', () => {
-        const text = jdInput.value.trim();
-        if (!text) {
-            showToast('Please enter a job description', 'error');
-            return;
+        try {
+            const text = jdInput.value.trim();
+            if (!text) {
+                showToast('Please enter a job description', 'error');
+                return;
+            }
+            
+            if (!window.Redrob || !window.Redrob.JDParser) {
+                alert("Critical Error: JDParser module failed to load.");
+                return;
+            }
+            
+            currentJobProfile = window.Redrob.JDParser.parse(text);
+            console.log("Parsed Job Profile:", currentJobProfile);
+            showToast('Job description analyzed successfully!', 'success');
+            showSection(sectionCandidates);
+        } catch (err) {
+            console.error("Parse JD Error:", err);
+            alert("Error parsing JD: " + err.message);
         }
-        
-        currentJobProfile = window.Redrob.JDParser.parse(text);
-        console.log("Parsed Job Profile:", currentJobProfile);
-        showToast('Job description analyzed successfully!', 'success');
-        showSection(sectionCandidates);
-    });
-
-    btnLoadDemo.addEventListener('click', () => {
-        jdInput.value = window.Redrob.DemoData.jobDescription;
-        candidatesInput.value = JSON.stringify(window.Redrob.DemoData.candidates, null, 2);
-        showToast('Demo data loaded', 'success');
     });
 
     btnBackJd.addEventListener('click', () => {
@@ -134,65 +137,98 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Step 2: Rank Candidates
     btnRank.addEventListener('click', () => {
-        const text = candidatesInput.value.trim();
-        if (!text) {
-            showToast('Please enter candidate data', 'error');
-            return;
-        }
-
-        let rawCandidates;
         try {
-            rawCandidates = JSON.parse(text);
-        } catch (e) {
-            showToast('Invalid JSON candidate data', 'error');
-            return;
-        }
-
-        // Show Progress UI
-        const progressContainer = document.getElementById('ranking-progress-container');
-        const progressFill = document.getElementById('ranking-progress-fill');
-        const progressText = document.getElementById('ranking-progress-text');
-        
-        progressContainer.style.display = 'block';
-        progressFill.style.width = '0%';
-        progressText.textContent = '0%';
-        btnRank.disabled = true;
-        btnRank.textContent = 'Processing...';
-
-        // Spawn Worker
-        const worker = new Worker('js/worker.js');
-        
-        worker.onmessage = function(e) {
-            if (e.data.type === 'progress') {
-                progressFill.style.width = e.data.progress + '%';
-                progressText.textContent = e.data.progress + '%';
-            } else if (e.data.type === 'complete') {
-                currentRankedCandidates = e.data.ranked;
-                
-                // Cleanup
-                worker.terminate();
-                btnRank.disabled = false;
-                btnRank.textContent = '🚀 Rank Candidates';
-                progressContainer.style.display = 'none';
-                
-                renderDashboard();
-                showSection(sectionResults);
-                showToast(`Ranking complete! Processed ${currentRankedCandidates.length} candidates.`, 'success');
-            } else if (e.data.type === 'error') {
-                worker.terminate();
-                btnRank.disabled = false;
-                btnRank.textContent = '🚀 Rank Candidates';
-                progressContainer.style.display = 'none';
-                showToast(e.data.message, 'error');
-                console.error("Worker Error:", e.data.message);
+            if (!currentJobProfile) {
+                alert("Please Analyze a Job Description first!");
+                showSection(sectionJd);
+                return;
             }
-        };
-        
-        // Start Processing
-        worker.postMessage({
-            candidates: rawCandidates,
-            jobProfile: currentJobProfile
-        });
+
+            const text = candidatesInput.value.trim();
+            if (!text) {
+                showToast('Please enter candidate data', 'error');
+                return;
+            }
+
+            let rawCandidates;
+            try {
+                rawCandidates = JSON.parse(text);
+            } catch (e) {
+                showToast('Invalid JSON candidate data', 'error');
+                return;
+            }
+
+            // Show Progress UI
+            const progressContainer = document.getElementById('ranking-progress-container');
+            const progressFill = document.getElementById('ranking-progress-fill');
+            const progressText = document.getElementById('ranking-progress-text');
+            
+            progressContainer.style.display = 'block';
+            progressFill.style.width = '0%';
+            progressText.textContent = '0%';
+            btnRank.disabled = true;
+            btnRank.textContent = 'Processing...';
+
+            // Spawn Worker with Try/Catch (often fails on file:// protocol)
+            let worker;
+            try {
+                worker = new Worker('js/worker.js');
+            } catch (workerErr) {
+                console.error(workerErr);
+                alert("Failed to start Web Worker. If you are opening this file directly (file://), your browser may block Web Workers. Please use a local web server.");
+                btnRank.disabled = false;
+                btnRank.textContent = '🚀 Rank Candidates';
+                progressContainer.style.display = 'none';
+                return;
+            }
+            
+            worker.onmessage = function(e) {
+                if (e.data.type === 'progress') {
+                    progressFill.style.width = e.data.progress + '%';
+                    progressText.textContent = e.data.progress + '%';
+                } else if (e.data.type === 'complete') {
+                    currentRankedCandidates = e.data.ranked;
+                    
+                    // Cleanup
+                    worker.terminate();
+                    btnRank.disabled = false;
+                    btnRank.textContent = '🚀 Rank Candidates';
+                    progressContainer.style.display = 'none';
+                    
+                    renderDashboard();
+                    showSection(sectionResults);
+                    showToast(`Intelligence Engine complete! Processed ${currentRankedCandidates.length} candidates.`, 'success');
+                } else if (e.data.type === 'error') {
+                    worker.terminate();
+                    btnRank.disabled = false;
+                    btnRank.textContent = '🚀 Rank Candidates';
+                    progressContainer.style.display = 'none';
+                    showToast(e.data.message, 'error');
+                    console.error("Worker Error:", e.data.message);
+                    alert("Worker Error: " + e.data.message);
+                }
+            };
+            
+            worker.onerror = function(err) {
+                worker.terminate();
+                btnRank.disabled = false;
+                btnRank.textContent = '🚀 Rank Candidates';
+                progressContainer.style.display = 'none';
+                console.error("Worker Global Error:", err.message);
+                alert("Worker Global Error: " + err.message + "\nFile: " + err.filename + "\nLine: " + err.lineno);
+            };
+            
+            // Start Processing
+            worker.postMessage({
+                candidates: rawCandidates,
+                jobProfile: currentJobProfile
+            });
+        } catch (err) {
+            console.error("Rank Error:", err);
+            alert("Error initializing ranking: " + err.message);
+            btnRank.disabled = false;
+            btnRank.textContent = '🚀 Rank Candidates';
+        }
     });
 
     btnBackCandidates.addEventListener('click', () => {
@@ -220,12 +256,49 @@ document.addEventListener('DOMContentLoaded', () => {
     // Step 3: Render Dashboard
     function renderDashboard() {
         rankedList.innerHTML = '';
+
+        // Generate Dynamic JD Summary
+        let classification = "Standard Technical";
+        const jdTitle = (currentJobProfile.title || "").toLowerCase();
+        if (jdTitle.includes('ai') || jdTitle.includes('machine learning')) classification = "AI/ML Focus";
+        if (jdTitle.includes('manager') || jdTitle.includes('lead')) classification = "Leadership/Management";
         
+        document.getElementById('jd-summary').innerHTML = `
+            <div><strong>Role:</strong> ${currentJobProfile.title || "N/A"}</div>
+            <div><strong>Experience:</strong> ${currentJobProfile.experience_years || 0}+ years</div>
+            <div><strong>Classification:</strong> ${classification}</div>
+        `;
+
+        // Generate Weight Bars
+        const weights = window.Redrob.DynamicWeights.generate(currentJobProfile);
+        let weightsHtml = '';
+        for (const [key, val] of Object.entries(weights)) {
+            if (val > 0) {
+                weightsHtml += `
+                    <div style="margin-bottom: 8px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8em; color: var(--text-muted); margin-bottom: 2px;">
+                            <span>${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
+                            <span>${(val * 100).toFixed(0)}%</span>
+                        </div>
+                        <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                            <div style="width: ${(val * 100)}%; height: 100%; background: var(--accent-color);"></div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        document.getElementById('weight-controls').innerHTML = weightsHtml;
+
         // Stats
+        const avgConf = Math.round(currentRankedCandidates.reduce((sum, c) => sum + c.compositeResult.confidence_score, 0) / currentRankedCandidates.length) || 0;
+        const highConf = currentRankedCandidates.filter(c => c.compositeResult.confidence_score > 80).length;
+        const honeypots = currentRankedCandidates.filter(c => c.compositeResult.honeypot_risk_score > 30).length;
+
         document.getElementById('summary-stats').innerHTML = `
             <div class="summary-stat-card">Total: ${currentRankedCandidates.length}</div>
-            <div class="summary-stat-card">Top Match: ${currentRankedCandidates.filter(c => c.tier === 'Top Match').length}</div>
-            <div class="summary-stat-card">Avg Score: ${Math.round(currentRankedCandidates.reduce((sum, c) => sum + c.compositeResult.final_score, 0) / currentRankedCandidates.length) || 0}</div>
+            <div class="summary-stat-card">High Confidence: ${highConf}</div>
+            <div class="summary-stat-card">Avg Confidence: ${avgConf}</div>
+            <div class="summary-stat-card" style="${honeypots > 0 ? 'color: var(--danger-color);' : ''}">Honeypots: ${honeypots}</div>
         `;
 
         // Render ONLY Top 100 to prevent browser crash
@@ -236,34 +309,54 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.createElement('div');
             card.className = 'candidate-card animate-in';
             card.style.setProperty('--delay', `${idx * 0.05}s`);
+            card.style.cursor = 'pointer'; // Make it clickable
             
-            let flagsHtml = '';
-            const dashData = r.compositeResult._dashboardData;
-            if (dashData && dashData.flags && dashData.flags.length > 0) {
-                flagsHtml = dashData.flags.map(flag => 
-                    `<span class="risk-badge risk-badge--high">⚠️ ${flag}</span>`
-                ).join('');
-            }
+            const dashData = r.compositeResult._dashboardData || {};
+            const isHoneypot = r.compositeResult.honeypot_risk_score > 30;
+            const conf = r.compositeResult.confidence_score;
             
+            let confBadgeColor = conf > 80 ? 'var(--success-color)' : (conf > 50 ? 'var(--warning-color)' : 'var(--danger-color)');
+            let confText = conf > 80 ? 'High Confidence' : (conf > 50 ? 'Medium Confidence' : 'Low Confidence');
+
+            let riskBadgeHtml = isHoneypot ? `<span style="background: rgba(255,107,107,0.2); color: #ff6b6b; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 10px;">High Risk / Honeypot</span>` : 
+                                `<span style="background: rgba(74,222,128,0.2); color: #4ade80; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 10px;">Low Risk</span>`;
+
             card.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h3 class="candidate-name">#${r.rank} - ${r.candidate.name}</h3>
-                        <div class="candidate-title">${r.candidate.title} | ${r.candidate.total_experience_years} yrs</div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center;">
+                            <h3 class="candidate-name" style="margin: 0;">#${r.rank} - ${r.candidate.name}</h3>
+                            <span style="background: ${confBadgeColor}33; color: ${confBadgeColor}; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-left: 10px;">${confText} (${conf})</span>
+                            ${riskBadgeHtml}
+                        </div>
+                        <div class="candidate-title" style="margin-top: 4px;">${r.candidate.title} | ${r.candidate.total_experience_years} yrs</div>
                     </div>
-                    <div style="text-align: right;">
-                        <div class="score-badge" style="background: var(--${r.tierColor}-dark); color: var(--${r.tierColor}-text); padding: 4px 8px; border-radius: 4px; font-weight: bold;">
+                    <div style="text-align: right; min-width: 120px;">
+                        <div class="score-badge" style="background: var(--${r.tierColor}-dark); color: var(--${r.tierColor}-text); padding: 4px 8px; border-radius: 4px; font-weight: bold; display: inline-block;">
                            ${r.compositeResult.final_score} - ${r.tier}
                         </div>
                     </div>
                 </div>
-                <div style="margin-top: 10px; font-size: 0.9em; color: var(--text-muted);">
+                <div style="margin-top: 12px; font-size: 0.9em; color: var(--text-muted); line-height: 1.4;">
                     ${r.compositeResult.reasoning}
                 </div>
-                <div style="margin-top: 10px;">
-                    ${flagsHtml}
+                
+                <!-- Expandable Details -->
+                <div class="candidate-details-grid" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.85em;">
+                    <div><span style="color:var(--text-muted)">Tech Fit:</span> <strong>${r.compositeResult.technical_fit}</strong></div>
+                    <div><span style="color:var(--text-muted)">Behavior:</span> <strong>${r.compositeResult.behavioral_fit}</strong></div>
+                    <div><span style="color:var(--text-muted)">Career:</span> <strong>${r.compositeResult.career_fit}</strong></div>
+                    <div><span style="color:var(--text-muted)">AI Ready:</span> <strong>${r.compositeResult.ai_transition_readiness}</strong></div>
+                    <div><span style="color:var(--text-muted)">Interact:</span> <strong>${r.compositeResult.interaction_score}</strong></div>
+                    <div><span style="color:var(--text-muted)">Leadership:</span> <strong>${r.compositeResult.leadership_growth || 0}</strong></div>
                 </div>
             `;
+            
+            // Expand logic
+            card.addEventListener('click', () => {
+                const grid = card.querySelector('.candidate-details-grid');
+                grid.style.display = grid.style.display === 'none' ? 'grid' : 'none';
+            });
             
             rankedList.appendChild(card);
         }

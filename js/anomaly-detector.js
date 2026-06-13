@@ -66,32 +66,59 @@ window.Redrob.AnomalyDetector = {
             const title = (recentExp.title || "").toLowerCase();
             const desc = (recentExp.description || "").toLowerCase();
             
-            // Check for blatant mismatches (e.g., Support title but architect desc)
+            // Check for blatant mismatches
             if (title.includes("support") && (desc.includes("architect") || desc.includes("machine learning") || desc.includes("cloud"))) {
                 anomalyPoints += 25;
                 consistencyPoints -= 30;
                 honeypotRisk += 50;
-                flags.push("Major role mismatch: Title and Description indicate different domains");
+                flags.push("Role Contradiction: Support title but Architect/ML description");
             }
             if (title.includes("manager") && desc.includes("intern")) {
                 anomalyPoints += 30;
                 consistencyPoints -= 40;
                 honeypotRisk += 60;
-                flags.push("Major role mismatch: Leadership title with intern description");
+                flags.push("Role Contradiction: Leadership title with intern description");
             }
         }
 
-        // 5. Behavioral Anomalies
+        // 5. Advanced Honeypot Detection
         const rs = candidate.redrob_signals;
         if (rs) {
-            // Bot/Scraper pattern: High Github Activity but 0 connections or very low completeness
-            if (rs.github_activity_score > 8 && rs.connection_count < 20) {
+            // Behavioral Contradiction: High Github but Low Interview Completion
+            const compRate = rs.interview_completion_rate !== undefined ? rs.interview_completion_rate : 1.0;
+            if (rs.github_activity_score > 8 && compRate < 0.2) {
                 anomalyPoints += 20;
-                honeypotRisk += 30;
-                flags.push("Behavioral anomaly: High GitHub activity but isolated profile");
+                honeypotRisk += 40;
+                flags.push("Behavioral Contradiction: Extremely high Github activity but very low interview completion");
             }
             
-            // High application rate but terrible recruiter response
+            // Skill Inflation & Assessment Mismatch
+            if (candidate.skills && candidate.skills.length > 15) {
+                const advancedSkills = candidate.skills.filter(s => s.level === 'advanced').length;
+                
+                if (rs.skill_assessment_scores) {
+                    const avgScore = Object.values(rs.skill_assessment_scores).reduce((a,b) => a+b, 0) / Object.values(rs.skill_assessment_scores).length;
+                    
+                    if (advancedSkills > 8 && avgScore < 40) {
+                        anomalyPoints += 30;
+                        honeypotRisk += 50;
+                        flags.push("Skill Inflation: Claimed many advanced skills but failed assessments");
+                    }
+                    
+                    // Assessment Mismatch (e.g., failed specific skill tests)
+                    const nlpSkills = candidate.skills.filter(s => s.name.toLowerCase().includes('nlp') || s.name.toLowerCase().includes('llm'));
+                    if (nlpSkills.length > 0 && rs.skill_assessment_scores['nlp'] < 30) {
+                         honeypotRisk += 30;
+                         flags.push("Assessment Mismatch: Claimed advanced NLP skills but failed NLP assessment");
+                    }
+                } else if (advancedSkills > 15) {
+                    // Claiming everything is advanced with no assessments is a mild flag
+                    anomalyPoints += 10;
+                    flags.push("Skill Inflation: High volume of unverified advanced skills");
+                }
+            }
+            
+            // Spam applicant pattern
             if (rs.applications_submitted_30d > 20 && rs.recruiter_response_rate < 0.1) {
                 anomalyPoints += 10;
                 consistencyPoints -= 10;
@@ -104,7 +131,7 @@ window.Redrob.AnomalyDetector = {
                 if (perfectScores >= 4) {
                     anomalyPoints += 20;
                     honeypotRisk += 40;
-                    flags.push("Suspiciously perfect skill assessments");
+                    flags.push("Suspiciously perfect skill assessments across multiple domains");
                 }
             }
         }

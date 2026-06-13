@@ -5,9 +5,13 @@ importScripts(
     'candidate-normalizer.js',
     'scoring/skill-matcher.js',
     'anomaly-detector.js',
-    'feature-engineering.js',
-    'skill-clustering.js',
-    'behavioral-intelligence.js',
+    'scoring/ai-transition-engine.js',
+    'scoring/signal-interaction-engine.js',
+    'scoring/confidence-engine.js',
+    'scoring/career-analysis.js',
+    'feature-engineering.js', // Keep for basic career/edu features if CompositeScorer still uses it
+    'skill-clustering.js', // Keep for domain scoring if CompositeScorer still uses it
+    'behavioral-intelligence.js', // Keep for basic behavioral features
     'dynamic-weights.js',
     'scoring/composite-scorer.js',
     'ranker.js'
@@ -22,7 +26,7 @@ self.onmessage = function(e) {
         const total = normalized.length;
         const scoredCandidates = [];
         let processed = 0;
-        const batchSize = 1000; // Chunk size
+        const batchSize = 1000;
         
         function processBatch() {
             const batch = normalized.slice(processed, processed + batchSize);
