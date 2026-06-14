@@ -16,32 +16,26 @@
 
 .intelligence-sidebar {
     position: sticky;
-    top: 20px;
-    height: calc(100vh - 120px);
-    overflow: hidden;
+    top: 24px;
+    align-self: start;
+    height: auto;
+    overflow: visible;
 }
 
-.sidebar-scroll-content {
-    height: 100%;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding-right: 6px;
+.sidebar-scroll-container {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    padding: 24px;
+    gap: 24px;
 }
 
-.sidebar-scroll-content::-webkit-scrollbar {
-    width: 6px;
+.sidebar-section {
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
-
-.sidebar-scroll-content::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.sidebar-scroll-content::-webkit-scrollbar-thumb {
-    background: rgba(120, 120, 255, 0.4);
-    border-radius: 10px;
+.sidebar-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
 }
 
 .dashboard-main {
@@ -436,26 +430,20 @@
   }
 
   .intelligence-sidebar {
-    order: 2;
+    order: 1;
     position: static;
     height: auto;
     overflow: visible;
   }
 
-  .sidebar-scroll-content {
-    flex-direction: row;
-    flex-wrap: wrap;
-    overflow-y: visible;
+  .sidebar-scroll-container {
+    flex-direction: column;
+    overflow: visible;
     height: auto;
   }
 
-  .intelligence-sidebar .panel {
-    flex: 1;
-    min-width: 280px;
-  }
-
   .dashboard-main {
-    order: 1;
+    order: 2;
   }
 
   .summary-stats {
