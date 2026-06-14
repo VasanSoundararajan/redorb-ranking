@@ -1,222 +1,368 @@
-# Redrob Candidate Intelligence Engine
+# Redrob Intelligence Engine
 
-An advanced AI-powered candidate ranking and talent intelligence platform built for the Redrob Intelligent Candidate Discovery & Ranking Challenge.
+> AI-Powered Candidate Discovery, Intelligence Analysis, and Explainable Ranking Platform
 
-The system goes beyond traditional resume ranking by combining semantic skill analysis, behavioral intelligence, dynamic job matching, anomaly detection, confidence modeling, and explainable candidate evaluation to identify the strongest candidates from large-scale candidate pools.
+Redrob Intelligence Engine is an advanced candidate ranking and talent intelligence system built for large-scale candidate evaluation. The platform combines semantic skill analysis, behavioral intelligence, AI transition detection, confidence scoring, leadership assessment, anomaly detection, and explainable ranking to identify the strongest candidates for a given Job Description.
 
 ---
 
 ## Overview
 
-Traditional ranking systems rely heavily on keyword matching and years of experience.
+Traditional resume screening relies heavily on keyword matching and years of experience.
 
-This platform introduces a Candidate Intelligence Engine that evaluates candidates across multiple dimensions:
+Redrob Intelligence Engine introduces a multi-dimensional Candidate Intelligence Framework that evaluates candidates across:
 
-* Technical fit
-* Career progression
-* Behavioral signals
-* Market demand
-* AI transition potential
-* Profile confidence
-* Anomaly detection
-* Honeypot risk detection
+* Technical Capability
+* Career Growth
+* Leadership Potential
+* Behavioral Signals
+* Market Demand
+* AI Readiness
+* Confidence & Trustworthiness
+* Risk & Honeypot Detection
 
-The result is a more accurate, explainable, and fraud-resistant ranking system.
+The result is a transparent and recruiter-friendly ranking system designed for high-volume candidate evaluation.
 
 ---
 
-## Key Features
+# Core Features
 
-### Semantic Skill Intelligence
+## Intelligent Job Description Analysis
 
-Groups related skills into domains rather than relying on exact keyword matches.
+Automatically analyzes the uploaded Job Description and extracts:
 
-Supported domains include:
-
-* Generative AI
-* Machine Learning
-* Data Engineering
-* MLOps
-* Cloud Engineering
-* Backend Engineering
-* Frontend Engineering
+* Job Title
+* Role Classification
+* Seniority Level
+* Experience Requirements
+* Required Skills
+* Preferred Skills
+* Leadership Requirements
+* Technical Depth
+* AI Readiness Requirements
+* Domain Classification
 
 Example:
 
 ```text
-LLM
-LoRA
-Prompt Engineering
-RAG
-Transformers
+Senior AI Engineer
+Role Type: AI Engineer
+Seniority: Senior
+Experience: 5-9 Years
+Technical Depth: High
+Leadership: Medium
 ```
 
-are treated as a Generative AI capability cluster.
+---
+
+## Semantic Skill Intelligence
+
+Moves beyond keyword matching by grouping related technologies into intelligent domain clusters.
+
+Supported Domains:
+
+* Generative AI
+* Machine Learning
+* Data Engineering
+* Backend Engineering
+* Cloud Engineering
+* MLOps
+* Frontend Engineering
+* DevOps
+
+Example:
+
+```text
+LLMs
+Prompt Engineering
+RAG
+LoRA
+Transformers
+Vector Databases
+```
+
+are treated as a single Generative AI capability cluster.
 
 ---
 
-### Behavioral Intelligence Engine
+## Behavioral Intelligence Engine
 
-Transforms Redrob behavioral signals into actionable candidate insights.
+Transforms behavioral signals into recruiter-friendly intelligence.
 
-Derived metrics include:
+Evaluates:
 
-* Responsiveness Score
-* Recruitability Score
-* Reliability Score
-* Market Demand Score
-* Engagement Score
-* Mobility Score
+* Recruitability
+* Responsiveness
+* Reliability
+* Engagement
+* Market Demand
+* Career Mobility
 
----
-
-### Dynamic Job Matching
-
-The system automatically analyzes job descriptions and generates role-specific scoring weights.
-
-Examples:
-
-#### AI Engineer
-
-Prioritizes:
-
-* AI skills
-* Technical depth
-* AI transition potential
-* MLOps experience
-
-#### Engineering Manager
-
-Prioritizes:
-
-* Leadership
-* Career progression
-* Behavioral indicators
-* Team management
+Provides deeper insights than traditional resume scoring.
 
 ---
 
-### AI Transition Readiness
+## Signal Interaction Engine
 
-Identifies candidates who are not currently AI engineers but have strong potential to transition successfully.
-
-Examples:
-
-* Data Engineers with ML exposure
-* Backend Engineers with LLM projects
-* Analytics Engineers with AI side projects
-
----
-
-### Signal Interaction Analysis
-
-Evaluates combinations of behavioral signals instead of isolated metrics.
-
-Detects patterns such as:
-
-* Passive High-Value Candidates
-* Strong Market Signals
-* Active Job Seekers
-* High-Risk Candidates
-
----
-
-### Confidence Engine
-
-Calculates profile trustworthiness using:
-
-* Profile completeness
-* Verification status
-* Assessment coverage
-* Behavioral consistency
-* Anomaly detection
-
----
-
-### Advanced Honeypot Detection
-
-Designed specifically for challenge datasets containing synthetic or misleading profiles.
+Analyzes combinations of behavioral signals rather than isolated metrics.
 
 Detects:
 
-* Timeline inconsistencies
-* Salary anomalies
-* Role contradictions
-* Skill inflation
-* Assessment mismatches
-* Behavioral contradictions
-
----
-
-### Explainable Rankings
-
-Every ranked candidate includes recruiter-friendly reasoning explaining:
-
-* Why the candidate ranked highly
-* Key strengths
-* Relevant experience
-* Important differentiators
-
----
-
-## Architecture
+### Passive High-Value Candidates
 
 ```text
-Candidate Data
-      │
-      ▼
-Data Normalization
-      │
-      ▼
-Feature Engineering
-      │
-      ▼
-Semantic Skill Intelligence
-      │
-      ▼
-Behavioral Intelligence
-      │
-      ▼
-AI Transition Analysis
-      │
-      ▼
-Signal Interaction Engine
-      │
-      ▼
-Anomaly Detection
-      │
-      ▼
-Confidence Engine
-      │
-      ▼
-Dynamic JD Weighting
-      │
-      ▼
-Composite Scoring
-      │
-      ▼
-Candidate Ranking
+Low Applications
+High Recruiter Interest
+High Response Rate
+```
+
+### Strong Market Signals
+
+```text
+High Searches
+High Recruiter Saves
+High Completion Rate
+```
+
+### Active Job Seekers
+
+```text
+Open To Work
+Fast Response
+High Application Activity
+```
+
+### Risk Candidates
+
+```text
+High Applications
+Low Recruiter Response
+Low Completion Rate
 ```
 
 ---
 
-## Scoring Components
+## AI Transition Readiness Engine
 
-| Component           | Purpose                                       |
-| ------------------- | --------------------------------------------- |
-| Technical Fit       | Measures skill and domain alignment           |
-| Career Fit          | Evaluates relevant experience and progression |
-| Behavioral Fit      | Uses Redrob behavioral signals                |
-| Market Demand       | Measures recruiter interest and visibility    |
-| AI Transition Score | Identifies AI-ready talent                    |
-| Confidence Score    | Measures profile trustworthiness              |
-| Leadership Growth   | Evaluates management progression              |
-| Honeypot Risk       | Detects suspicious profiles                   |
-| Anomaly Risk        | Detects inconsistencies                       |
+Identifies candidates capable of transitioning into AI-related roles.
+
+Evaluates:
+
+* Technical Foundation
+* Machine Learning Exposure
+* Generative AI Exposure
+* Project Experience
+* Learning Signals
+* Open Source Contributions
+
+Ideal for finding hidden AI talent.
 
 ---
 
-## Ranking Formula
+## Confidence Engine
+
+Measures profile reliability and trustworthiness.
+
+Factors:
+
+* Profile Completeness
+* Verification Status
+* Assessment Coverage
+* Behavioral Stability
+* Consistency Analysis
+
+Outputs:
+
+```text
+High Confidence
+Medium Confidence
+Low Confidence
+```
+
+---
+
+## Leadership & Scope Intelligence
+
+Measures growth in responsibility over time.
+
+Analyzes:
+
+* Promotion Trajectory
+* Team Leadership
+* Mentorship
+* Budget Ownership
+* Stakeholder Management
+* Business Impact
+
+Outputs:
+
+```text
+Leadership Growth Score
+```
+
+---
+
+## Advanced Honeypot Detection
+
+Built specifically for challenge datasets containing synthetic or misleading profiles.
+
+Detects:
+
+### Skill Inflation
+
+```text
+Many Advanced Skills
+Low Assessment Scores
+```
+
+### Role Contradictions
+
+```text
+Customer Support
+vs
+Senior ML Architect
+```
+
+### Behavioral Contradictions
+
+```text
+High Github Activity
+Very Low Interview Completion
+```
+
+### Assessment Mismatches
+
+```text
+Advanced NLP Claims
+Low Assessment Performance
+```
+
+Outputs:
+
+```text
+Low Risk
+Medium Risk
+High Risk
+```
+
+---
+
+# Candidate Intelligence Dashboard
+
+The platform provides a recruiter-focused intelligence dashboard.
+
+---
+
+## Executive Metrics
+
+Displays:
+
+* Total Candidates
+* High Confidence Candidates
+* Average Confidence
+* Average Technical Fit
+* Average Behavioral Fit
+* Top AI Transition Candidates
+* Low Risk Profiles
+* Potential Honeypots
+
+---
+
+## Candidate Intelligence Cards
+
+Each ranked candidate includes:
+
+* Final Score
+* Confidence Badge
+* Risk Indicator
+* Experience Summary
+* Candidate Reasoning
+* Skill Highlights
+
+---
+
+## Expandable Candidate Intelligence Breakdown
+
+Each candidate can expose detailed scoring insights:
+
+### Technical Analysis
+
+* Technical Fit
+* Domain Match
+* Skill Match
+
+### Behavioral Analysis
+
+* Recruitability
+* Responsiveness
+* Market Demand
+
+### Career Analysis
+
+* Career Fit
+* Leadership Growth
+* Stability
+
+### AI Analysis
+
+* AI Transition Score
+* Generative AI Match
+* ML Match
+
+### Trust & Risk
+
+* Confidence Score
+* Honeypot Risk
+* Anomaly Risk
+
+---
+
+## Ranking Pipeline Visualization
+
+Displays the complete intelligence pipeline:
+
+```text
+Job Description
+        ↓
+Skill Intelligence
+        ↓
+Behavioral Intelligence
+        ↓
+Career Analysis
+        ↓
+AI Transition Engine
+        ↓
+Signal Interaction Engine
+        ↓
+Confidence Engine
+        ↓
+Anomaly Detection
+        ↓
+Final Ranking
+```
+
+---
+
+# Dynamic Scoring Engine
+
+The system dynamically generates scoring weights based on the Job Description.
+
+Example:
+
+```text
+Technical Fit        35%
+AI Transition        20%
+Confidence Score     15%
+Behavioral Fit       10%
+Career Fit           10%
+Interaction Score    10%
+```
+
+This allows different jobs to use different ranking strategies.
+
+---
+
+# Scoring Formula
 
 ```text
 Final Score =
@@ -236,124 +382,204 @@ Confidence Score × 15%
 Leadership Growth × 10%
 )
 -
-Risk Penalties
--
-Honeypot Penalties
+(
+Anomaly Risk
++
+Honeypot Risk
+)
 ```
 
-All scores are normalized to a 0–100 scale.
-
----
-
-## Project Structure
+Scores are normalized to:
 
 ```text
-redrob-ranking/
-│
-├── index.html
-├── css/
-├── data/
-│
-├── js/
-│   ├── ranker.js
-│   ├── jd-parser.js
-│   ├── explanation-generator.js
-│
-│   └── scoring/
-│       ├── skill-clustering.js
-│       ├── feature-engineering.js
-│       ├── behavioral-intelligence.js
-│       ├── ai-transition-engine.js
-│       ├── signal-interaction-engine.js
-│       ├── confidence-engine.js
-│       ├── anomaly-detector.js
-│       ├── dynamic-weights.js
-│       ├── career-analysis.js
-│       └── composite-scorer.js
-│
-└── README.md
+0 – 100
 ```
 
 ---
 
-## How It Works
+# Export Functionality
 
-### Step 1
+The platform supports direct submission-ready exports.
 
-Load candidate dataset.
+## Download CSV
 
-### Step 2
+Generates:
 
-Parse job description.
+```text
+submission.csv
+```
 
-### Step 3
-
-Generate role-specific weights.
-
-### Step 4
-
-Extract candidate features.
-
-### Step 5
-
-Calculate:
-
-* Technical Fit
-* Behavioral Fit
-* Career Fit
-* AI Transition Potential
-* Confidence Score
-
-### Step 6
-
-Apply anomaly and honeypot penalties.
-
-### Step 7
-
-Generate final ranking.
-
-### Step 8
-
-Produce recruiter-facing explanations.
+Contains ranked candidates in Redrob-compatible format.
 
 ---
 
-## Performance Goals
+## Download JSON
 
-Designed to:
+Generates:
 
-* Process 100,000 candidates efficiently
-* Operate within CPU-only environments
-* Avoid expensive LLM inference during ranking
-* Support explainable decision-making
-* Minimize false positives
-* Reduce honeypot selection risk
+```text
+submission.json
+```
+
+Contains:
+
+* Ranking Metadata
+* Job Information
+* Candidate Intelligence
+* Final Rankings
 
 ---
 
-## Technologies
+## Download All
 
-* JavaScript (ES6+)
+Generates:
+
+```text
+submission.csv
+submission.json
+```
+
+with a single click.
+
+---
+
+# Supported Inputs
+
+## Job Description
+
+Supported Formats:
+
+```text
+PDF
+DOCX
+TXT
+MD
+```
+
+---
+
+## Candidate Data
+
+Supported Formats:
+
+```text
+JSON
+CSV
+XLSX
+```
+
+---
+
+# Architecture
+
+```text
+Candidate Data
+        │
+        ▼
+Data Normalization
+        │
+        ▼
+Feature Engineering
+        │
+        ▼
+JD Intelligence
+        │
+        ▼
+Semantic Skill Analysis
+        │
+        ▼
+Behavioral Intelligence
+        │
+        ▼
+Signal Interaction Engine
+        │
+        ▼
+AI Transition Engine
+        │
+        ▼
+Leadership Analysis
+        │
+        ▼
+Confidence Engine
+        │
+        ▼
+Anomaly Detection
+        │
+        ▼
+Honeypot Detection
+        │
+        ▼
+Composite Scoring
+        │
+        ▼
+Candidate Ranking
+        │
+        ▼
+Export Engine
+```
+
+---
+
+# Technology Stack
+
+### Frontend
+
 * HTML5
 * CSS3
-* Browser-based execution
+* JavaScript (ES6)
+
+### Candidate Intelligence
+
+* Rule-Based Scoring
 * Feature Engineering
+* Semantic Skill Clustering
 * Behavioral Analytics
-* Rule-Based Candidate Intelligence
+
+### Deployment
+
+* GitHub Pages
+* Netlify
+* Vercel
 
 ---
 
-## Future Enhancements
+# Key Advantages
 
-* Graph-based candidate similarity
-* Learning-to-rank models
-* Embedding-based skill matching
-* Hybrid ML ranking pipelines
-* Feedback-driven weight optimization
-* Advanced behavioral clustering
+✅ Explainable Rankings
+
+✅ AI Transition Detection
+
+✅ Behavioral Intelligence
+
+✅ Leadership Analysis
+
+✅ Confidence Scoring
+
+✅ Honeypot Detection
+
+✅ Dynamic Job Weighting
+
+✅ Recruiter-Friendly Dashboard
+
+✅ Submission-Ready Exports
+
+✅ Scalable to 100,000+ Candidates
+
+---
+
+# Future Roadmap
+
+* Embedding-Based Skill Matching
+* Learning-to-Rank Models
+* Graph-Based Candidate Similarity
+* LLM-Assisted Reasoning
+* Candidate Comparison View
+* Recruiter Feedback Loop
+* Automated Weight Optimization
+* Multi-JD Candidate Benchmarking
 
 ---
 
 ## License
 
-This project was developed as part of the Redrob Intelligent Candidate Discovery & Ranking Challenge for research, experimentation, and hackathon evaluation purposes.
+Developed for the Redrob Intelligent Candidate Discovery & Ranking Challenge and intended for educational, research, and talent intelligence experimentation purposes.
