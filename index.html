@@ -62,10 +62,6 @@
     <section id="step-candidates" class="step-section">
       <div class="panel">
         <div class="panel-header">Candidate Profiles</div>
-        <div class="tab-group">
-          <button class="tab-item active" data-tab="json">File / Text Input</button>
-          <button class="tab-item" data-tab="preview">Preview</button>
-        </div>
         <div id="tab-json" class="tab-content active">
           <div class="drop-zone" id="candidates-drop-zone">
               <span class="drop-zone-icon">📂</span>
@@ -74,9 +70,6 @@
           </div>
           <div style="margin: 16px 0; text-align: center; color: var(--text-muted); font-size: 0.9em;">OR PASTE JSON</div>
           <textarea id="candidates-input" class="json-editor" placeholder='[{ "candidate_id": "C001", ... }]'></textarea>
-        </div>
-        <div id="tab-preview" class="tab-content">
-          <div id="candidates-preview" class="candidates-grid"></div>
         </div>
         <div class="step-actions">
           <button id="btn-back-jd" class="btn-secondary">← Back</button>
@@ -121,6 +114,17 @@
         <!-- Main Results Area -->
         <div class="dashboard-main">
           <div class="summary-stats" id="summary-stats"></div>
+
+          <!-- Export Panel -->
+          <div class="export-panel">
+            <div style="font-weight: 600; color: var(--text-primary);">Export Results</div>
+            <div style="display: flex; gap: 12px;">
+              <button id="btn-export-csv" class="btn-secondary">Download CSV</button>
+              <button id="btn-export-json-file" class="btn-secondary">Download JSON</button>
+              <button id="btn-export-all" class="btn-primary">Download All</button>
+            </div>
+          </div>
+
           <div class="filter-bar" id="filter-bar">
             <input type="text" class="input-field" id="search-candidates" placeholder="🔍 Search candidates...">
             <select class="input-field" id="sort-by">
@@ -155,7 +159,6 @@
 
   <!-- ========== SCRIPTS ========== -->
   <script src="js/utils.js"></script>
-  <script src="data/demo-data.js"></script>
   <script src="js/file-parsers.js"></script>
   <script src="js/jd-parser.js"></script>
   <script src="js/candidate-normalizer.js"></script>

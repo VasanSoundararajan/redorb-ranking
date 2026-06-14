@@ -253,6 +253,119 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // --- Submission Export Logic ---
+    const btnExportCsv = document.getElementById('btn-export-csv');
+    const btnExportJsonFile = document.getElementById('btn-export-json-file');
+    const btnExportAll = document.getElementById('btn-export-all');
+
+    function validateExport() {
+        if (!currentRankedCandidates || currentRankedCandidates.length === 0) {
+            showToast("No ranked candidates available.<br>Run ranking first.", "error");
+            return false;
+        }
+        return true;
+    }
+
+    function generateCsv() {
+        let csvContent = "candidate_id,rank,score,reasoning\n";
+        currentRankedCandidates.forEach(c => {
+            const id = c.candidate?.candidate_id || "";
+            const rank = c.rank || "";
+            const score = c.compositeResult?.final_score || "";
+            let reasoning = c.compositeResult?.reasoning || "";
+            // Escape quotes and wrap in quotes
+            reasoning = '"' + reasoning.replace(/"/g, '""') + '"';
+            
+            csvContent += `${id},${rank},${score},${reasoning}\n`;
+        });
+        
+        const csvBlob = new Blob([csvContent], { type: "text/csv" });
+        const url = URL.createObjectURL(csvBlob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "submission.csv";
+        a.click();
+    }
+
+    function generateJson() {
+        const exportData = {
+            job_description: {
+                job_title: currentJobProfile?.title || "",
+                required_skills: currentJobProfile?.required_skills || [],
+                preferred_skills: currentJobProfile?.preferred_skills || []
+            },
+            ranking_metadata: {
+                generated_at: new Date().toISOString(),
+                total_candidates: currentRankedCandidates.length,
+                ranking_version: "1.0"
+            },
+            top_candidates: currentRankedCandidates.map(c => ({
+                candidate_id: c.candidate?.candidate_id || "",
+                rank: c.rank || 1,
+                technical_fit: c.compositeResult?.technical_fit || 0,
+                behavioral_fit: c.compositeResult?.behavioral_fit || 0,
+                career_fit: c.compositeResult?.career_fit || 0,
+                ai_transition_score: c.compositeResult?.ai_transition_readiness || 0,
+                confidence_score: c.compositeResult?.confidence_score || 0,
+                honeypot_risk_score: c.compositeResult?.honeypot_risk_score || 0,
+                final_score: c.compositeResult?.final_score || 0,
+                reasoning: c.compositeResult?.reasoning || ""
+            }))
+        };
+        
+        const jsonBlob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(jsonBlob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "submission.json";
+        a.click();
+    }
+    if (btnExportCsv) {
+        btnExportCsv.addEventListener('click', () => {
+            console.log("CSV Export Started");
+            console.log("Ranked Candidates:", currentRankedCandidates);
+            if (!validateExport()) return;
+            try {
+                generateCsv();
+                showToast("✓ CSV Downloaded<br><br>Ready for Submission", "success");
+            } catch (err) {
+                console.error(err);
+                showToast("Export Failed<br>Unable to generate file.", "error");
+            }
+        });
+    }
+
+    if (btnExportJsonFile) {
+        btnExportJsonFile.addEventListener('click', () => {
+            console.log("JSON Export Started");
+            console.log("Ranked Candidates:", currentRankedCandidates);
+            if (!validateExport()) return;
+            try {
+                generateJson();
+                showToast("✓ JSON Downloaded<br><br>Ready for Submission", "success");
+            } catch (err) {
+                console.error(err);
+                showToast("Export Failed<br>Unable to generate file.", "error");
+            }
+        });
+    }
+
+    if (btnExportAll) {
+        btnExportAll.addEventListener('click', () => {
+            console.log("Download All Started");
+            console.log("Ranked Candidates:", currentRankedCandidates);
+            if (!validateExport()) return;
+            try {
+                generateCsv();
+                generateJson();
+                showToast("✓ CSV Downloaded<br>✓ JSON Downloaded<br><br>Ready for Submission", "success");
+            } catch (err) {
+                console.error(err);
+                showToast("Export Failed<br>Unable to generate file.", "error");
+            }
+        });
+    }
+
     // Step 3: Render Dashboard
     function renderDashboard() {
         rankedList.innerHTML = '';

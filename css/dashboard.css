@@ -387,6 +387,20 @@
 
 
 /* ============================================================
+   EXPORT PANEL
+   ============================================================ */
+.export-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  margin-bottom: 20px;
+}
+
+/* ============================================================
    FILTER BAR
    ============================================================ */
 .filter-bar {
